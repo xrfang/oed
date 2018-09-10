@@ -4,8 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	oed "oedcli"
 	"time"
 )
+
+var oc *oed.Client
 
 func main() {
 	ver := flag.Bool("version", false, "show version info")
@@ -17,7 +20,7 @@ func main() {
 		fmt.Println(verinfo())
 		return
 	}
-	http.HandleFunc("/", handler)
+	oc = oed.NewClient(*id, *key)
 	svr := http.Server{
 		Addr:         ":" + *port,
 		ReadTimeout:  time.Minute,
