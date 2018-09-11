@@ -1,0 +1,39 @@
+{{define "header"}}
+<html>
+
+<head>
+  <title>ELA Vocab {{ver}}</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" href="bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="jquery/jquery.toast.min.css">
+  <link rel="stylesheet" href="fontawesome/css/all.min.css">
+  <script src="jquery/jquery-3.3.1.min.js"></script>
+  <script src="jquery/jquery.cookie.js"></script>
+  <script src="jquery/jquery.toast.min.js"></script>
+  <script src="bootstrap/bootstrap.bundle.min.js"></script>
+  <script>
+    function showError(title, mesg) {
+        $.toast({
+            heading: '<b style="font-size:15px;font-family:courier">'+title+"</b>",
+            text: '<span style="font-size:15px;font-family:courier">'+mesg+'</span>',
+            position: 'mid-center',
+            icon: 'warning',
+            loader: false,
+            bgColor: '#666666',
+            textColor: 'white',
+            textAlign: 'left',
+            allowToastClose: false,
+            stack: false,
+            showHideTransition: 'fade'
+        })
+    }
+    $(document).ajaxError(function(_, xhr, settings) {
+        stat = xhr.status + " " + xhr.statusText
+        mesg = settings.type + ' ' + settings.url + '<br><p style="white-space:pre">' + xhr.responseText + '</p>'
+        showError(stat, mesg)
+    });
+  </script>  
+</head>
+<body>
+{{end}}

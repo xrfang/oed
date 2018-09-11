@@ -21,6 +21,9 @@ func main() {
 		return
 	}
 	oc = oed.NewClient(*id, *key)
+
+	http.HandleFunc("/", home)
+	http.HandleFunc("/favicon.ico", favicon)
 	svr := http.Server{
 		Addr:         ":" + *port,
 		ReadTimeout:  time.Minute,
