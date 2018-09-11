@@ -39,5 +39,5 @@ type QueryResult struct {
 }
 
 type QueryReply struct {
-	Result QueryResult
+	Results []QueryResult
 }

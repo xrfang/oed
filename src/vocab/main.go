@@ -1,10 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"net/http"
 	oed "oedcli"
+	"os"
 	"time"
 )
 
@@ -20,8 +22,16 @@ func main() {
 		fmt.Println(verinfo())
 		return
 	}
-	oc = oed.NewClient(*id, *key)
-
+	oc = oed.NewClient(*id, *key, 30)
+	qr, err := oc.Query("ace")
+	if err != nil {
+		fmt.Println("query failed:", err)
+	} else {
+		je := json.NewEncoder(os.Stdout)
+		je.SetIndent("", "    ")
+		je.Encode(qr)
+	}
+	return
 	http.HandleFunc("/", home)
 	http.HandleFunc("/favicon.ico", favicon)
 	svr := http.Server{
