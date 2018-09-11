@@ -1,6 +1,6 @@
 package oed
 
-type GrammaticalFeature struct {
+type note struct {
 	Text string
 	Type string
 }
@@ -9,20 +9,25 @@ type Example struct {
 	Text string
 }
 
+type ThesaurusLink struct {
+	EntryID string `json:"entry_id"`
+	SenseID string `json:"sense_id"`
+}
+
 type Sense struct {
-	Definitions []string
-	Domains     []string
-	Examples    []Example
+	Definitions    []string
+	Domains        []string
+	Examples       []Example
+	Notes          []note
+	SubSenses      []Sense
+	ThesaurusLinks []ThesaurusLink
 }
 
 type Entry struct {
-	GrammaticalFeatures []GrammaticalFeature
-	Senses              []Sense
+	Senses []Sense
 }
 
 type Pronunciation struct {
-	AudioFile        string
-	Dialects         []string
 	PhoneticSpelling string
 }
 
@@ -35,7 +40,6 @@ type LexicalEntry struct {
 
 type QueryResult struct {
 	LexicalEntries []LexicalEntry
-	Word           string
 }
 
 type QueryReply struct {

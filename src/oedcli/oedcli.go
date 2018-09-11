@@ -1,9 +1,9 @@
 package oed
 
 import (
-	"io"
+	"encoding/json"
+	"errors"
 	"net/http"
-	"os"
 	"time"
 )
 
@@ -43,13 +43,9 @@ func (c Client) Query(word string) (qr QueryReply, err error) {
 	resp, err := hc.Do(req)
 	assert(err)
 	defer resp.Body.Close()
-	io.Copy(os.Stdout, resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		panic(errors.New(resp.Status))
+	}
+	assert(json.NewDecoder(resp.Body).Decode(&qr))
 	return
-	/*
-		if resp.StatusCode != http.StatusOK {
-			panic(errors.New(resp.Status))
-		}
-		assert(json.NewDecoder(resp.Body).Decode(&qr))
-		return
-	*/
 }
