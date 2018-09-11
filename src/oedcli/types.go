@@ -14,13 +14,20 @@ type ThesaurusLink struct {
 	SenseID string `json:"sense_id"`
 }
 
+type RelatedWord struct {
+	Text string
+}
+
 type Sense struct {
+	ID             string
 	Definitions    []string
 	Domains        []string
 	Examples       []Example
 	Notes          []note
 	SubSenses      []Sense
 	ThesaurusLinks []ThesaurusLink
+	Synonyms       []RelatedWord
+	Antonyms       []RelatedWord
 }
 
 type Entry struct {
