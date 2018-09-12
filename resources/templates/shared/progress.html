@@ -1,0 +1,29 @@
+{{define "progress"}}
+<div class="modal" id="pleaseWaitDialog" data-backdrop="static" data-keyboard=false role="dialog">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Please wait...</h5>
+      </div>
+      <div class="modal-body">
+        <div class="progress" style="margin-top:4.5px;height:30px;display:inline-block;width:calc(100% - 90px)">
+          <div class="progress-bar progress-bar-success progress-bar-striped active"
+            role="progressbar" style="height:30px;font-weight:bold;font-size:1rem;width:20%">20%</div>
+        </div>
+        <button id="interrupt" class="btn btn-primary float-right">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function showPleaseWait() {
+    $("#pleaseWaitDialog").modal("show");
+}
+function hidePleaseWait() {
+    $("#pleaseWaitDialog").modal("hide");
+}
+$(document).ready(function(){
+    showPleaseWait()
+})
+</script>
+{{end}}
