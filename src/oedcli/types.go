@@ -33,6 +33,7 @@ type Entry struct {
 }
 
 type Pronunciation struct {
+	AudioFile        string
 	PhoneticSpelling string
 }
 
