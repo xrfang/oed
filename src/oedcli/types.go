@@ -5,7 +5,7 @@ type note struct {
 	Type string
 }
 
-type Example struct {
+type textEntry struct {
 	Text string
 }
 
@@ -14,24 +14,22 @@ type ThesaurusLink struct {
 	SenseID string `json:"sense_id"`
 }
 
-type RelatedWord struct {
-	Text string
-}
-
 type Sense struct {
 	ID             string
 	Definitions    []string
 	Domains        []string
-	Examples       []Example
+	Examples       []textEntry
 	Notes          []note
+	Registers      []string
 	SubSenses      []Sense
 	ThesaurusLinks []ThesaurusLink
-	Synonyms       []RelatedWord
-	Antonyms       []RelatedWord
+	Synonyms       []textEntry
+	Antonyms       []textEntry
 }
 
 type Entry struct {
-	Senses []Sense
+	GrammaticalFeatures []note
+	Senses              []Sense
 }
 
 type Pronunciation struct {

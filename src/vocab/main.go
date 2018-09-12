@@ -10,8 +10,14 @@ import (
 )
 
 var oc *oed.Client
+var cache string
 
 func main() {
+	defer func() {
+		if e := recover(); e != nil {
+			fmt.Printf("%v\n", e)
+		}
+	}()
 	ver := flag.Bool("version", false, "show version info")
 	id := flag.String("id", "", "OED app_id")
 	key := flag.String("key", "", "OED app_key")
@@ -27,7 +33,7 @@ func main() {
 		return
 	}
 	assert(os.MkdirAll(cache, 0755))
-	oc = oed.NewClient(*id, *key, 30)
+	oc = oed.NewClient(*id, *key, cache, 30)
 	http.HandleFunc("/", home)
 	http.HandleFunc("/favicon.ico", favicon)
 	http.HandleFunc("/query/", query)
@@ -36,5 +42,5 @@ func main() {
 		ReadTimeout:  time.Minute,
 		WriteTimeout: time.Minute,
 	}
-	svr.ListenAndServe()
+	assert(svr.ListenAndServe())
 }
