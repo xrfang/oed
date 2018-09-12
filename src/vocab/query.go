@@ -27,18 +27,17 @@ func lookup(word, feature string) (les []oed.LexicalEntry, err error) {
 
 type RelatedWords struct {
 	Examples []string `json:",omitempty"`
-	Tags     string   `json:",omitempty"`
+	Tags     []string `json:",omitempty"`
 	Type     string
 	Words    []string
-	tags     []string
 }
 
 type Sense struct {
 	Definition string
-	Domains    string            `json:",omitempty"`
+	Domains    []string          `json:",omitempty"`
 	Examples   []string          `json:",omitempty"`
 	Notes      map[string]string `json:",omitempty"`
-	Registers  string            `json:",omitempty"`
+	Registers  []string          `json:",omitempty"`
 	Thesaurus  []RelatedWords    `json:",omitempty"`
 	SubSenses  []Sense           `json:",omitempty"`
 }
@@ -67,14 +66,14 @@ func query(w http.ResponseWriter, r *http.Request) {
 			rw := rwg[relation]
 			for _, r := range s.Registers {
 				var exists bool
-				for _, t := range rw.tags {
+				for _, t := range rw.Tags {
 					exists = t == r
 					if exists {
 						break
 					}
 				}
 				if !exists {
-					rw.tags = append(rw.tags, r)
+					rw.Tags = append(rw.Tags, r)
 				}
 			}
 			for _, ex := range s.Examples {
@@ -91,7 +90,6 @@ func query(w http.ResponseWriter, r *http.Request) {
 					rw.Words = append(rw.Words, w.Text)
 				}
 			}
-			rw.Tags = strings.Join(rw.tags, ",")
 			rwg[relation] = rw
 			rels[s.ID] = rwg
 		}
@@ -119,7 +117,7 @@ func query(w http.ResponseWriter, r *http.Request) {
 	getSense := func(s oed.Sense) Sense {
 		var ss Sense
 		ss.Definition = strings.Join(s.Definitions, "\n")
-		ss.Domains = strings.Join(s.Domains, ",")
+		ss.Domains = s.Domains
 		for _, x := range s.Examples {
 			ss.Examples = append(ss.Examples, x.Text)
 		}
@@ -127,7 +125,7 @@ func query(w http.ResponseWriter, r *http.Request) {
 		for _, n := range s.Notes {
 			ss.Notes[n.Type] = n.Text
 		}
-		ss.Registers = strings.Join(s.Registers, ",")
+		ss.Registers = s.Registers
 		for _, tl := range s.ThesaurusLinks {
 			rw := rels[tl.SenseID]
 			if rw == nil {
