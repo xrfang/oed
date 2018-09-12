@@ -1,4 +1,5 @@
 assets.go
 bin/
+cache/
 github.com
 pkg/
