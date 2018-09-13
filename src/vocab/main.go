@@ -37,6 +37,11 @@ func main() {
 	http.HandleFunc("/", home)
 	http.HandleFunc("/favicon.ico", favicon)
 	http.HandleFunc("/query/", query)
+	http.HandleFunc("/progress", func(w http.ResponseWriter, r *http.Request) {
+		//for test only
+		time.Sleep(5000 * time.Millisecond)
+		fmt.Fprintln(w, "done...")
+	})
 	svr := http.Server{
 		Addr:         ":" + *port,
 		ReadTimeout:  time.Minute,

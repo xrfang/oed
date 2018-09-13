@@ -13,10 +13,43 @@
         <label for="words"><i class="fas fa-info-circle"></i>&nbsp;enter all words below, separate them by comma or new line.</label>
         <textarea class="form-control" id="words" rows="5" style="border-color:cadetblue;resize:none"></textarea>
       </div>
-      <button type="button" class="btn btn-info float-right" style="font-weight:bold">Lookup</button>      
+      <button id="lookup" type="button" class="btn btn-info float-right" style="font-weight:bold">Lookup</button>      
     </div>
   </div>
 </div>
+<script>
+$(document).ready(function() {
+  $('#lookup').click(function() {
+    var xhrs = []
+    showWIPDialog(function(){
+      $.each(xhrs, function(_, xhr) {
+        xhr.abort()
+      })
+    })    
+    var words = $('#words').val().replace(/[,\r\n]+/g, ",")
+    var entries = []
+    $.each(words.split(","), function(_, w) {
+      w = w.trim()
+      if (w != "") {
+        entries.push(w)
+      }
+    })
+    var L = entries.length
+    var c = 0
+    $.each(entries, function(_, e) {
+      var xhr = $.get("/progress?entry="+e, function(ret) {
+        c++
+        percent = Math.round(c/L*100)
+        setWIProgress(percent)
+        if (c>=L) {
+          hideWIPDialog()
+        }
+      })
+      xhrs.push(xhr)
+    })
+  })
+})
+</script>
 {{template "progress"}}
 {{template "footer"}}
 {{end}}

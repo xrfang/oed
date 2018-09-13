@@ -1,5 +1,5 @@
 {{define "progress"}}
-<div class="modal" id="pleaseWaitDialog" data-backdrop="static" data-keyboard=false role="dialog">
+<div class="modal" id="wipDialog" data-backdrop="static" data-keyboard=false role="dialog">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
@@ -7,23 +7,44 @@
       </div>
       <div class="modal-body">
         <div class="progress" style="margin-top:4px;height:30px;display:inline-block;width:calc(100% - 90px)">
-          <div class="progress-bar progress-bar-success progress-bar-striped active"
+          <div id="wipProgress" class="progress-bar progress-bar-success progress-bar-striped active"
             role="progressbar" style="height:30px;font-weight:bold;font-size:1rem;width:20%">20%</div>
         </div>
-        <button id="interrupt" class="btn btn-primary float-right">Cancel</button>
+        <button id="interrupt" class="btn btn-danger float-right">Cancel</button>
       </div>
     </div>
   </div>
 </div>
 <script>
-function showPleaseWait() {
-    $("#pleaseWaitDialog").modal("show");
+function setWIProgress(percent) {
+    $('#wipProgress').css("width", percent + "%")
+    $('#wipProgress').text(percent + "%")
 }
-function hidePleaseWait() {
-    $("#pleaseWaitDialog").modal("hide");
+
+function showWIPDialog(cancel) {
+    if (typeof(cancel) == "function") {
+        $('#interrupt').css("display", "")
+        $('#interrupt').click(function() {
+            cancel()
+            hideWIPDialog(0)
+        })
+    } else {
+        $('#wipDialog .progress').css("width", "100%")
+        $('#interrupt').css("display", "none")
+    }
+    setWIProgress(0)
+    $("#wipDialog").modal("show");
 }
-$(document).ready(function(){
-    showPleaseWait()
-})
+function hideWIPDialog(delay) {
+    var timeout = 1000
+    if (typeof(delay) == "number" && delay>=0 && delay <= 1000) {
+        timeout = delay
+    }
+    if (timeout == 0) {
+        $("#wipDialog").modal("hide")
+        return
+    }
+    setTimeout(`$("#wipDialog").modal("hide")`, timeout)
+}
 </script>
 {{end}}
