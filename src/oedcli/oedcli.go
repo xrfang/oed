@@ -47,12 +47,19 @@ func (c Client) doQuery(url, cache string) (qr QueryReply, err error) {
 			return
 		}
 	}
+	defer func() {
+		if e := recover(); e != nil {
+			err = e.(error)
+		}
+	}()
 	hc := http.Client{Timeout: c.timeout}
-	req, err := http.NewRequest("GET", url, nil)
+	var req *http.Request
+	var resp *http.Response
+	req, err = http.NewRequest("GET", url, nil)
 	assert(err)
 	req.Header.Set("app_id", c.AppID)
 	req.Header.Set("app_key", c.AppKey)
-	resp, err := hc.Do(req)
+	resp, err = hc.Do(req)
 	assert(err)
 	defer resp.Body.Close()
 	f, err = os.OpenFile(cache, os.O_RDWR|os.O_CREATE, 0644)
@@ -64,11 +71,15 @@ func (c Client) doQuery(url, cache string) (qr QueryReply, err error) {
 		f.Seek(0, 0)
 		assert(json.NewDecoder(f).Decode(&qr))
 	} else {
-		qr.Error = resp.Status
-		var buf bytes.Buffer
-		_, err = io.Copy(&buf, resp.Body)
-		if err == nil && buf.Len() > 0 {
-			qr.Error += "\n\n" + buf.String()
+		if resp.StatusCode == 404 {
+			qr.Error = "ERR_NO_ENTRY"
+		} else {
+			qr.Error = resp.Status
+			var buf bytes.Buffer
+			_, err = io.Copy(&buf, resp.Body)
+			if err == nil && buf.Len() > 0 {
+				qr.Error += "\n\n" + buf.String()
+			}
 		}
 		je := json.NewEncoder(f)
 		je.SetIndent("", "    ")

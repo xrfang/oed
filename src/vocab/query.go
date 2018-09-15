@@ -13,6 +13,9 @@ func extractEntries(qr oed.QueryReply, err error) ([]oed.LexicalEntry, error) {
 		return nil, err
 	}
 	if qr.Error != "" {
+		if qr.Error == "ERR_NO_ENTRY" {
+			return nil, nil
+		}
 		return nil, errors.New(qr.Error)
 	}
 	var les []oed.LexicalEntry
