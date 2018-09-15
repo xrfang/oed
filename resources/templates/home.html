@@ -3,19 +3,24 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <a class="navbar-brand" href="#"><img height="48" src="/img/title.png"></a>
 </nav>
-<div class="container" style="width:100%;padding:10px">
-  <div class="card border-primary">
-    <div class="card-header text-white bg-info">
-      <b>STEP1: Lookup the Words</b>
-    </div>    
-    <div class="card-body">
-      <div class="form-group">
-        <label for="words"><i class="fas fa-info-circle"></i>&nbsp;enter all words below, separate them by comma or new line.</label>
-        <textarea class="form-control" id="words" rows="5" style="border-color:cadetblue;resize:none"></textarea>
+<div id="accordion" class="container" style="width:100%;padding:10px">
+  <div class="card">
+    <div class="card-header bg-info" id="headingOne">
+      <button class="btn btn-link text-white" data-toggle="collapse" data-target="#dict">
+        <h4 style="margin:0;font-weight:bold"><i class="fas fa-book"></i>&nbsp;DICTIONARY</h4>
+      </button>
+    </div>
+    <div id="dict" class="collapse show" data-parent="#accordion">
+      <div class="card-body">
+        <div class="form-group">
+          <label for="words"><i class="fas fa-info-circle"></i>&nbsp;enter all words below, separate them by comma or new line.</label>
+          <textarea class="form-control" id="words" rows="5" style="border-color:cadetblue;resize:none"></textarea>
+        </div>
+        <button id="lookup" type="button" class="btn btn-info float-right" style="font-weight:bold;margin-bottom:18px">Lookup</button>    
       </div>
-      <button id="lookup" type="button" class="btn btn-info float-right" style="font-weight:bold">Lookup</button>      
     </div>
   </div>
+  <div class="card"></div>
 </div>
 <script>
 $(document).ready(function() {
@@ -35,9 +40,15 @@ $(document).ready(function() {
       }
     })
     var L = entries.length
+    if (L == 0) {
+      hideWIPDialog(0)
+      showToast("info", "Error", "Nothing to do...")
+      return
+    }
     var c = 0
     $.each(entries, function(_, e) {
-      var xhr = $.get("/progress?entry="+e, function(ret) {
+      var xhr = $.get("/query/"+e, function(ret) {
+        console.log(ret)
         c++
         percent = Math.round(c/L*100)
         setWIProgress(percent)
