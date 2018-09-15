@@ -49,5 +49,6 @@ type QueryResult struct {
 }
 
 type QueryReply struct {
-	Results []QueryResult
+	Error   string        `json:",omitifempty"`
+	Results []QueryResult `json:",omitifempty"`
 }

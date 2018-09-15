@@ -2,34 +2,32 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"oedcli"
-	"regexp"
 	"strings"
 )
 
-var nx *regexp.Regexp
-
-func init() {
-	nx = regexp.MustCompile(`\s+`)
-}
-
-func lookup(word, feature string) (les []oed.LexicalEntry, err error) {
-	qr, err := oc.Query(word, feature)
+func extractEntries(qr oed.QueryReply, err error) ([]oed.LexicalEntry, error) {
 	if err != nil {
 		return nil, err
 	}
+	if qr.Error != "" {
+		return nil, errors.New(qr.Error)
+	}
+	var les []oed.LexicalEntry
 	for _, r := range qr.Results {
 		les = append(les, r.LexicalEntries...)
 	}
-	return
+	return les, nil
 }
 
-type RelatedWords struct {
-	Examples []string `json:",omitempty"`
-	Tags     []string `json:",omitempty"`
-	Type     string
-	Words    []string
+type Thesaurus struct {
+	Examples  []string    `json:",omitempty"`
+	Registers []string    `json:",omitempty"`
+	Synonyms  []string    `json:",omitempty"`
+	Antonyms  []string    `json:",omitempty"`
+	SubSenses []Thesaurus `json:",omitempty"`
 }
 
 type Sense struct {
@@ -38,7 +36,7 @@ type Sense struct {
 	Examples   []string          `json:",omitempty"`
 	Notes      map[string]string `json:",omitempty"`
 	Registers  []string          `json:",omitempty"`
-	Thesaurus  []RelatedWords    `json:",omitempty"`
+	Thesaurus  []*Thesaurus      `json:",omitempty"`
 	SubSenses  []Sense           `json:",omitempty"`
 }
 
@@ -49,97 +47,75 @@ type LexicalEntry struct {
 	Text           string
 }
 
+func getThesaurus(tl oed.ThesaurusLink) (*Thesaurus, error) {
+	entries, err := extractEntries(oc.QueryThesaurus(tl.EntryID))
+	if err != nil {
+		return nil, err
+	}
+	collectThes := func(s oed.Sense) Thesaurus {
+		var th Thesaurus
+		for _, x := range s.Examples {
+			th.Examples = append(th.Examples, x.Text)
+		}
+		th.Registers = s.Registers
+		for _, w := range s.Synonyms {
+			th.Synonyms = append(th.Synonyms, w.Text)
+		}
+		for _, w := range s.Antonyms {
+			th.Antonyms = append(th.Antonyms, w.Text)
+		}
+		return th
+	}
+	var th Thesaurus
+	for _, ent := range entries {
+		for _, e := range ent.Entries {
+			for _, s := range e.Senses {
+				if s.ID != tl.SenseID {
+					continue
+				}
+				th = collectThes(s)
+				for _, ss := range s.SubSenses {
+					th.SubSenses = append(th.SubSenses, collectThes(ss))
+				}
+				return &th, nil
+			}
+		}
+	}
+	return nil, nil
+}
+
+func getSense(s oed.Sense) Sense {
+	var ss Sense
+	ss.Definition = strings.Join(s.Definitions, "\n")
+	ss.Domains = s.Domains
+	for _, x := range s.Examples {
+		ss.Examples = append(ss.Examples, x.Text)
+	}
+	ss.Notes = make(map[string]string)
+	for _, n := range s.Notes {
+		ss.Notes[n.Type] = n.Text
+	}
+	ss.Registers = s.Registers
+	for _, tl := range s.ThesaurusLinks {
+		t, err := getThesaurus(tl)
+		if err != nil || t == nil {
+			continue
+		}
+		ss.Thesaurus = append(ss.Thesaurus, t)
+	}
+	return ss
+}
+
 func query(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		if e := recover(); e != nil {
 			http.Error(w, e.(error).Error(), http.StatusInternalServerError)
 		}
 	}()
-	word := nx.ReplaceAllString(strings.TrimSpace(r.URL.Path[7:]), "_")
-	rels := make(map[string]map[string]RelatedWords)
-	getRelatedWords := func(feature string) {
-		extractWords := func(s oed.Sense, relation string) {
-			rwg := rels[s.ID]
-			if rwg == nil {
-				rwg = make(map[string]RelatedWords)
-			}
-			rw := rwg[relation]
-			for _, r := range s.Registers {
-				var exists bool
-				for _, t := range rw.Tags {
-					exists = t == r
-					if exists {
-						break
-					}
-				}
-				if !exists {
-					rw.Tags = append(rw.Tags, r)
-				}
-			}
-			for _, ex := range s.Examples {
-				rw.Examples = append(rw.Examples, ex.Text)
-			}
-			rw.Type = relation
-			switch relation {
-			case "synonyms":
-				for _, w := range s.Synonyms {
-					rw.Words = append(rw.Words, w.Text)
-				}
-			case "antonyms":
-				for _, w := range s.Antonyms {
-					rw.Words = append(rw.Words, w.Text)
-				}
-			}
-			rwg[relation] = rw
-			rels[s.ID] = rwg
-		}
-		rels, err := lookup(word, feature)
-		if err != nil {
-			return
-		}
-		for _, rel := range rels {
-			for _, e := range rel.Entries {
-				for _, s := range e.Senses {
-					extractWords(s, feature)
-					for _, ss := range s.SubSenses {
-						extractWords(ss, feature)
-					}
-				}
-			}
-
-		}
-	}
-	getRelatedWords("synonyms")
-	getRelatedWords("antonyms")
-	entries, err := lookup(word, "")
-	assert(err)
+	word := strings.TrimSpace(r.URL.Path[7:])
 	var les []LexicalEntry
-	getSense := func(s oed.Sense) Sense {
-		var ss Sense
-		ss.Definition = strings.Join(s.Definitions, "\n")
-		ss.Domains = s.Domains
-		for _, x := range s.Examples {
-			ss.Examples = append(ss.Examples, x.Text)
-		}
-		ss.Notes = make(map[string]string)
-		for _, n := range s.Notes {
-			ss.Notes[n.Type] = n.Text
-		}
-		ss.Registers = s.Registers
-		for _, tl := range s.ThesaurusLinks {
-			rw := rels[tl.SenseID]
-			if rw == nil {
-				continue
-			}
-			if len(rw["antonyms"].Words) > 0 {
-				ss.Thesaurus = append(ss.Thesaurus, rw["antonyms"])
-			}
-			if len(rw["synonyms"].Words) > 0 {
-				ss.Thesaurus = append(ss.Thesaurus, rw["synonyms"])
-			}
-		}
-		return ss
-	}
+	entries, err := extractEntries(oc.QueryDictionary(word))
+	assert(err)
 	for _, entry := range entries {
 		var le LexicalEntry
 		le.Category = entry.LexicalCategory
