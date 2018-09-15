@@ -13,26 +13,45 @@
   <script src="jquery/jquery.toast.min.js"></script>
   <script src="bootstrap/bootstrap.bundle.min.js"></script>
   <script>
-    function showError(title, mesg) {
-        $.toast({
-            heading: '<b style="font-size:15px;font-family:courier">'+title+"</b>",
-            text: '<span style="font-size:15px;font-family:courier">'+mesg+'</span>',
-            position: 'mid-center',
-            icon: 'warning',
-            loader: false,
-            bgColor: '#666666',
-            textColor: 'white',
-            textAlign: 'left',
-            allowToastClose: false,
-            stack: false,
-            showHideTransition: 'fade'
-        })
-    }
-    $(document).ajaxError(function(_, xhr, settings) {
-        stat = xhr.status + " " + xhr.statusText
-        mesg = settings.type + ' ' + settings.url + '<br><p style="white-space:pre">' + xhr.responseText + '</p>'
-        showError(stat, mesg)
-    });
+  function showToast(type, title, message) {
+      var opts = {
+          heading: '<b style="font-size:15px;font-family:courier">'+title+"</b>",
+          text: '<span style="font-size:15px;font-family:courier">'+message+'</span>',
+          position: 'mid-center',
+          loader: false,
+          bgColor: '#666666',
+          textColor: 'white',
+          textAlign: 'left',
+          stack: false,
+          hideAfter: 2000,
+          allowToastClose: false,
+          showHideTransition: 'fade'
+      }
+      switch(type.toLowerCase()) {
+      case "error":
+          opts.icon = "error"
+          opts.hideAfter = false
+          opts.allowToastClose = true
+          break
+      case "warning":
+          opts.icon = "warning"
+          opts.allowToastClose = true
+          opts.loader = true
+          opts.hideAfter = 5000
+          break
+      case "info":
+          opts.icon = "info"
+          break
+      case "success":
+          opts.icon = "success"
+      }
+      $.toast(opts)
+  }
+  $(document).ajaxError(function(_, xhr, settings) {
+      stat = xhr.status + " " + xhr.statusText
+      mesg = settings.type + ' ' + settings.url + '<br><p style="white-space:pre">' + xhr.responseText + '</p>'
+      showToast("error", stat, mesg)
+  });
   </script>  
 </head>
 <body>
