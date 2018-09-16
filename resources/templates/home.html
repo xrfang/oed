@@ -166,14 +166,14 @@ function saveResults(e, res) {
       })
       les.push(`
 <div class="card">
-  <div class="card-header" id="${r.Text}_h${i}">
+  <div class="card-header" id="${r.ID}_h${i}">
     <h5 class="mb-0">
-      <button class="btn btn-link" data-toggle="collapse" data-target="#${r.Text}_c${i}">
+      <button class="btn btn-link" data-toggle="collapse" data-target="#${r.ID}_c${i}">
         ${r.Category}
       </button>
     </h5>
   </div>
-  <div id="${r.Text}_c${i}" class="collapse" data-parent="#${id}_result">
+  <div id="${r.ID}_c${i}" class="collapse" data-parent="#${id}_result">
     <div class="card-body">${senses.join("")}</div>
   </div>
 </div>`)

@@ -20,7 +20,10 @@ func extractEntries(qr oed.QueryReply, err error) ([]oed.LexicalEntry, error) {
 	}
 	var les []oed.LexicalEntry
 	for _, r := range qr.Results {
-		les = append(les, r.LexicalEntries...)
+		for _, e := range r.LexicalEntries {
+			e.ID = r.ID
+			les = append(les, e)
+		}
 	}
 	return les, nil
 }

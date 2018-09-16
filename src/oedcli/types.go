@@ -42,9 +42,11 @@ type LexicalEntry struct {
 	LexicalCategory string
 	Pronunciations  []Pronunciation
 	Text            string
+	ID              string
 }
 
 type QueryResult struct {
+	ID             string
 	LexicalEntries []LexicalEntry
 }
 
