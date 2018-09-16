@@ -21,7 +21,7 @@ func main() {
 	ver := flag.Bool("version", false, "show version info")
 	id := flag.String("id", "", "OED app_id")
 	key := flag.String("key", "", "OED app_key")
-	port := flag.String("port", "63300", "service port")
+	port := flag.String("port", "3528", "service port")
 	flag.StringVar(&cache, "cache", "cache", "cache directory")
 	flag.Parse()
 	if *ver {
@@ -37,11 +37,6 @@ func main() {
 	http.HandleFunc("/", home)
 	http.HandleFunc("/favicon.ico", favicon)
 	http.HandleFunc("/query/", query)
-	http.HandleFunc("/progress", func(w http.ResponseWriter, r *http.Request) {
-		//for test only
-		time.Sleep(5000 * time.Millisecond)
-		fmt.Fprintln(w, "done...")
-	})
 	svr := http.Server{
 		Addr:         ":" + *port,
 		ReadTimeout:  time.Minute,

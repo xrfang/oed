@@ -18,14 +18,13 @@ td {padding-top:0 !important}
       <div class="card-body">
         <div class="form-group">
           <label for="words"><i class="fas fa-info-circle"></i>&nbsp;enter all words below, separate them by comma or new line.</label>
-          <textarea class="form-control" id="words" rows="5" style="border-color:cadetblue;resize:none">
-          </textarea>
+          <textarea class="form-control" id="words" rows="5" style="border-color:cadetblue;resize:none"></textarea>
         </div>
-        <button id="lookup" type="button" class="btn btn-primary float-right" style="font-weight:bold;margin-bottom:18px">Lookup</button>    
+        <button id="lookup" type="button" class="btn btn-primary float-right" style="font-weight:bold;margin-bottom:18px">Lookup</button>            
+        <button id="clear" type="button" class="btn btn-secondary float-right" style="font-weight:bold;margin-bottom:18px;margin-right:10px">Clear Results</button>
       </div>
     </div>
   </div>
-  <div class="card"></div>
 </div>
 <script>
 lookupResults = {}
@@ -36,10 +35,13 @@ function makeid() {
         id += chars.charAt(Math.floor(Math.random() * chars.length));
     return id;
 }
-function showResults() {
+function clearResults() {
   $.each($('#accordion').children(), function(i, c) {
     if (i > 0) c.remove()
   })
+}
+function showResults() {
+  clearResults()
   var words = []
   $.each(lookupResults, function(word) {
     words.push(word)
@@ -47,7 +49,6 @@ function showResults() {
   $.each(words.sort(), function(_, w) {
     $('#accordion').append(lookupResults[w])
   })
-  $('#dict').collapse()
 }
 function genThesaurusEntry(t) {
   var ts = []
@@ -183,6 +184,7 @@ function saveResults(e, res) {
   }
 }
 $(document).ready(function() {
+  $('#clear').click(clearResults)
   $('#lookup').click(function() {
     var xhrs = []
     showWIPDialog(function(){
@@ -195,7 +197,7 @@ $(document).ready(function() {
     $.each(words.split(","), function(_, w) {
       w = w.trim()
       if (w != "") {
-        entries.push(w)
+        entries.push(w.toLowerCase())
       }
     })
     var L = entries.length
@@ -204,6 +206,7 @@ $(document).ready(function() {
       showToast("info", "Error", "Nothing to do...")
       return
     }
+    $('#words').val(entries.join(", "))
     lookupResults = {}
     var c = 0
     $.each(entries, function(_, e) {
