@@ -8,17 +8,17 @@ td {padding-top:0 !important}
   <a class="navbar-brand" href="#"><img height="48" src="/img/title.png"></a>
 </nav>
 <div id="accordion" class="container" style="width:100%;padding:10px">
-  <div class="card">
+  <div id="dict" class="card">
     <div class="card-header bg-primary">
-      <button class="btn btn-link text-white" data-toggle="collapse" data-target="#dict">
+      <button class="btn btn-link text-white" data-toggle="collapse" data-target="#query">
         <h4 style="margin:0;font-weight:bold"><i class="fas fa-book"></i>&nbsp;DICTIONARY</h4>
       </button>
     </div>
-    <div id="dict" class="collapse show" data-parent="#accordion">
+    <div id="query" class="collapse show" data-parent="#accordion">
       <div class="card-body">
         <div class="form-group">
           <label for="words"><i class="fas fa-info-circle"></i>&nbsp;enter all words below, separate them by comma or new line.</label>
-          <textarea class="form-control" id="words" rows="5" style="border-color:cadetblue;resize:none"></textarea>
+          <textarea class="form-control" id="words" rows="3" style="border-color:cadetblue;resize:none"></textarea>
         </div>
         <button id="lookup" type="button" class="btn btn-primary float-right" style="font-weight:bold;margin-bottom:18px">Lookup</button>            
         <button id="clear" type="button" class="btn btn-secondary float-right" style="font-weight:bold;margin-bottom:18px;margin-right:10px">Clear Results</button>
@@ -47,7 +47,12 @@ function showResults() {
     words.push(word)
   })
   $.each(words.sort(), function(_, w) {
-    $('#accordion').append(lookupResults[w])
+    lr = lookupResults[w]
+    if (lr.indexOf("bg-danger") < 0) {
+      $('#accordion').append(lr)
+    } else {
+      $('#dict').after(lr)
+    }
   })
 }
 function genThesaurusEntry(t) {
@@ -90,6 +95,10 @@ function genSenseTable(sense) {
   id = "SENSE_"+makeid()
   var rows = []
   var def = sense.Definition
+  var isEmpty = (typeof(sense.Examples) == 'undefined') &&
+                (typeof(sense.Notes) == 'undefined') &&
+                (typeof(sense.Thesaurus) == 'undefined') &&
+                (typeof(sense.SubSenses) == 'undefined')
   if (typeof(sense.Domains) != "undefined") {
     var ds = []
     $.each(sense.Domains, function(_, d) {
@@ -99,8 +108,13 @@ function genSenseTable(sense) {
       def = ds.join(" ") + " " + def
     }
   }
-  rows.push(`<tr><th width="1%"><a data-toggle="collapse" href="#${id}">Definition</a></th><td>${def}</td></tr>`)
-  rows.push(`<tbody class="collapse" id="${id}">`)
+  if (def == "" || isEmpty) {
+    rows.push(`<tr><th width="1%">Definition</th><td>${def}</td></tr>`)
+    rows.push(`<tbody id="${id}">`)
+  } else {
+    rows.push(`<tr><th width="1%"><a data-toggle="collapse" href="#${id}">Definition</a></th><td>${def}</td></tr>`)
+    rows.push(`<tbody class="collapse" id="${id}">`)
+  }
   if (typeof(sense.Examples) != 'undefined') {
     rows.push(`<tr><th>Examples</th><td>${sense.Examples.join(";&nbsp; ")}</td>`)
   }
@@ -112,7 +126,7 @@ function genSenseTable(sense) {
     $.each(sense.Thesaurus, function(_, t) {
       trs.push(genThesaurusEntry(t))
     })
-    rows.push(`<tr><th>Thesarus</th><td style="padding:0">${trs.join("")}</td></tr>`)
+    rows.push(`<tr><th>Thesarus</th><td style="padding:0">${trs.join("<hr>")}</td></tr>`)
   }
   if (typeof(sense.SubSenses) != 'undefined') {
     var subs = []
@@ -125,15 +139,16 @@ function genSenseTable(sense) {
   var st = `<table class="table table-condensed table-borderless">${rows.join("")}</table>`
   return st
 }
-
 function saveResults(e, res) {
   var id = "ID_" + makeid()
   if (res == null) {
     lookupResults[e] = `
 <div class="card">
-  <div class="card-header bg-danger">
+  <div class="card-header bg-danger" style="padding:0.6rem">
     <button class="btn btn-link text-white" data-toggle="collapse" data-target="#${id}">
-      <h5 style="margin:0px"><b>${e}</b>: no such entry</h5>
+      <h4 class="mb-0" style="font-size:1.4rem">
+        <b>${e}</b>: no such entry
+      </h4>
     </button>
   </div>
   <div id="${id}" class="collapse" data-parent="#accordion"></div>
@@ -142,7 +157,6 @@ function saveResults(e, res) {
     var ps = {}
     var les = []
     $.each(res, function(i, r) {
-      console.log(r)
       var senses = []
       $.each(r.Pronunciations, function(_, p) {
         ps[p.PhoneticSpelling] = true
@@ -170,12 +184,12 @@ function saveResults(e, res) {
     })
     lookupResults[e] = `
 <div class="card">
-  <div class="card-header bg-info">
-    <h5 class="mb-0">
-      <button class="btn btn-link text-white" data-toggle="collapse" data-target="#${id}">
+  <div class="card-header bg-info" style="padding:0.6rem">
+    <button class="btn btn-link text-white" data-toggle="collapse" data-target="#${id}">
+      <h5 class="mb-0" style="font-size:1.4rem">
         <b>${e}</b>&nbsp;${phonetics.join(" ")}
-      </button>
-    </h5>
+      </h5>
+    </button>
   </div>
   <div id="${id}" class="collapse" data-parent="#accordion">
     <div id="${id}_result" style="padding:0" class="card-body">${les.join("")}</div>
