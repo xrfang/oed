@@ -9,6 +9,7 @@ import (
 	"path"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 	"unicode"
 )
@@ -19,6 +20,9 @@ type Client struct {
 	AppKey  string
 	url     string
 	cache   string
+	delay   int //in milliseconds
+	next    time.Time
+	sync.Mutex
 }
 
 func assert(err error) {
@@ -33,6 +37,7 @@ func NewClient(appID, appKey, cache string, queryTimeout int) *Client {
 		AppID:   appID,
 		AppKey:  appKey,
 		url:     "https://od-api.oxforddictionaries.com/api/v1/entries/en/",
+		delay:   1000, //free account
 		cache:   cache,
 	}
 }
@@ -47,11 +52,20 @@ func (c Client) doQuery(url, cache string) (qr QueryReply, err error) {
 			return
 		}
 	}
+	c.Lock()
 	defer func() {
 		if e := recover(); e != nil {
 			err = e.(error)
 		}
+		c.next = time.Now().Add(time.Duration(c.delay) * time.Millisecond)
+		c.Unlock()
 	}()
+	for {
+		if time.Now().After(c.next) {
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
 	hc := http.Client{Timeout: c.timeout}
 	var req *http.Request
 	var resp *http.Response
