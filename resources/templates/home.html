@@ -1,11 +1,15 @@
 {{define "body"}}
 {{template "header"}}
+<style>
+th {padding-top:0 !important;font-variant:small-caps;font-weight:normal}
+td {padding-top:0 !important}
+</style>    
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <a class="navbar-brand" href="#"><img height="48" src="/img/title.png"></a>
 </nav>
 <div id="accordion" class="container" style="width:100%;padding:10px">
   <div class="card">
-    <div class="card-header bg-info" id="headingOne">
+    <div class="card-header bg-primary">
       <button class="btn btn-link text-white" data-toggle="collapse" data-target="#dict">
         <h4 style="margin:0;font-weight:bold"><i class="fas fa-book"></i>&nbsp;DICTIONARY</h4>
       </button>
@@ -14,15 +18,170 @@
       <div class="card-body">
         <div class="form-group">
           <label for="words"><i class="fas fa-info-circle"></i>&nbsp;enter all words below, separate them by comma or new line.</label>
-          <textarea class="form-control" id="words" rows="5" style="border-color:cadetblue;resize:none"></textarea>
+          <textarea class="form-control" id="words" rows="5" style="border-color:cadetblue;resize:none">
+          </textarea>
         </div>
-        <button id="lookup" type="button" class="btn btn-info float-right" style="font-weight:bold;margin-bottom:18px">Lookup</button>    
+        <button id="lookup" type="button" class="btn btn-primary float-right" style="font-weight:bold;margin-bottom:18px">Lookup</button>    
       </div>
     </div>
   </div>
   <div class="card"></div>
 </div>
 <script>
+lookupResults = {}
+function makeid() {
+    var id = "";
+    var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for (var i = 0; i < 6; i++)
+        id += chars.charAt(Math.floor(Math.random() * chars.length));
+    return id;
+}
+function showResults() {
+  $.each($('#accordion').children(), function(i, c) {
+    if (i > 0) c.remove()
+  })
+  var words = []
+  $.each(lookupResults, function(word) {
+    words.push(word)
+  })
+  $.each(words.sort(), function(_, w) {
+    $('#accordion').append(lookupResults[w])
+  })
+  $('#dict').collapse()
+}
+function genThesaurusEntry(t) {
+  var ts = []
+  var tags = ""
+  badges = function(cat, list) {
+    return `<tr><th width="1%">${cat}</th><td>${tags}<span style="margin-bottom:5px" 
+      class="badge badge-dark">${list.join(`</span> <span style="margin-bottom:5px"
+      class="badge badge-dark">`)}</span></td></tr>`
+  }
+  if (typeof(t.Registers) != "undefined") {
+    var rs = []
+    $.each(t.Registers, function(_, r) {
+      rs.push(`<span style="margin-bottom:5px" class="badge badge-pill 
+        badge-warning">${r}</span>`)
+    })
+    if (rs.length > 0) {
+      tags = rs.join(" ") + " "
+    }
+  }
+  if (typeof(t.Examples) != "undefined") {
+    ts.push(`<tr><th width="1%">Examples</th><td>${t.Examples.join(";&nbsp; ")}</td></tr>`)
+  }
+  if (typeof(t.Synonyms) != "undefined") {
+    ts.push(badges('Synonyms', t.Synonyms))
+  }
+  if (typeof(t.Antonyms) != "undefined") {
+    ts.push(badges('Antonyms', t.Antonyms))
+  }
+  if (typeof(t.SubSenses) != "undefined") {
+    var subs = []
+    $.each(t.SubSenses, function(_, ss) {
+      subs.push(genThesaurusEntry(ss))
+    })
+    ts.push(`<tr><th width="1%">Subsenses</th><td style="padding:0">${subs.join("")}</td></tr>`)
+  }
+  return `<table class="table table-condensed mb-0">${ts.join("")}</table>`
+}
+function genSenseTable(sense) {
+  id = "SENSE_"+makeid()
+  var rows = []
+  var def = sense.Definition
+  if (typeof(sense.Domains) != "undefined") {
+    var ds = []
+    $.each(sense.Domains, function(_, d) {
+      ds.push(`<span style="margin-bottom:5px" class="badge badge-pill badge-info">${d}</span>`)
+    })
+    if (ds.length > 0) {
+      def = ds.join(" ") + " " + def
+    }
+  }
+  rows.push(`<tr><th width="1%"><a data-toggle="collapse" href="#${id}">Definition</a></th><td>${def}</td></tr>`)
+  rows.push(`<tbody class="collapse" id="${id}">`)
+  if (typeof(sense.Examples) != 'undefined') {
+    rows.push(`<tr><th>Examples</th><td>${sense.Examples.join(";&nbsp; ")}</td>`)
+  }
+  if (typeof(sense.Notes) != 'undefined') {
+    rows.push(`<tr><th>Usage</th><td>${sense.Notes["wordFormNote"]}</td></tr>`)
+  }
+  if (typeof(sense.Thesaurus) != 'undefined') {
+    var trs = []
+    $.each(sense.Thesaurus, function(_, t) {
+      trs.push(genThesaurusEntry(t))
+    })
+    rows.push(`<tr><th>Thesarus</th><td style="padding:0">${trs.join("")}</td></tr>`)
+  }
+  if (typeof(sense.SubSenses) != 'undefined') {
+    var subs = []
+    $.each(sense.SubSenses, function(_, ss) {
+      subs.push(genSenseTable(ss))
+    })
+    rows.push(`<tr><th width="1%">Subsenses</th><td style="padding:0">${subs.join("")}</td></tr>`)
+  }
+  rows.push(`</tbody>`)
+  var st = `<table class="table table-condensed table-borderless">${rows.join("")}</table>`
+  return st
+}
+
+function saveResults(e, res) {
+  var id = "ID_" + makeid()
+  if (res == null) {
+    lookupResults[e] = `
+<div class="card">
+  <div class="card-header bg-danger">
+    <button class="btn btn-link text-white" data-toggle="collapse" data-target="#${id}">
+      <h5 style="margin:0px"><b>${e}</b>: no such entry</h5>
+    </button>
+  </div>
+  <div id="${id}" class="collapse" data-parent="#accordion"></div>
+</div>`
+  } else {
+    var ps = {}
+    var les = []
+    $.each(res, function(i, r) {
+      console.log(r)
+      var senses = []
+      $.each(r.Pronunciations, function(_, p) {
+        ps[p.PhoneticSpelling] = true
+      })
+      $.each(r.Senses, function(_, s) {
+        senses.push(genSenseTable(s))
+      })
+      les.push(`
+<div class="card">
+  <div class="card-header" id="${r.Text}_h${i}">
+    <h5 class="mb-0">
+      <button class="btn btn-link" data-toggle="collapse" data-target="#${r.Text}_c${i}">
+        ${r.Category}
+      </button>
+    </h5>
+  </div>
+  <div id="${r.Text}_c${i}" class="collapse" data-parent="#${id}_result">
+    <div class="card-body">${senses.join("")}</div>
+  </div>
+</div>`)
+    })
+    var phonetics = []
+    $.each(ps, function(p){
+      phonetics.push(`<span class="badge badge-pill badge-secondary">${p}</span>`)
+    })
+    lookupResults[e] = `
+<div class="card">
+  <div class="card-header bg-info">
+    <h5 class="mb-0">
+      <button class="btn btn-link text-white" data-toggle="collapse" data-target="#${id}">
+        <b>${e}</b>&nbsp;${phonetics.join(" ")}
+      </button>
+    </h5>
+  </div>
+  <div id="${id}" class="collapse" data-parent="#accordion">
+    <div id="${id}_result" style="padding:0" class="card-body">${les.join("")}</div>
+  </div>
+</div>`
+  }
+}
 $(document).ready(function() {
   $('#lookup').click(function() {
     var xhrs = []
@@ -30,7 +189,7 @@ $(document).ready(function() {
       $.each(xhrs, function(_, xhr) {
         xhr.abort()
       })
-    })    
+    })
     var words = $('#words').val().replace(/[,\r\n]+/g, ",")
     var entries = []
     $.each(words.split(","), function(_, w) {
@@ -45,15 +204,17 @@ $(document).ready(function() {
       showToast("info", "Error", "Nothing to do...")
       return
     }
+    lookupResults = {}
     var c = 0
     $.each(entries, function(_, e) {
       var xhr = $.get("/query/"+e, function(ret) {
-        console.log(ret)
+        saveResults(e, ret)
         c++
         percent = Math.round(c/L*100)
         setWIProgress(percent)
         if (c>=L) {
-          hideWIPDialog()
+          hideWIPDialog(700)
+          showResults()
         }
       })
       xhrs.push(xhr)
