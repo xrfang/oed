@@ -6,12 +6,28 @@ td {padding-top:0 !important}
 </style>    
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <a class="navbar-brand" href="#"><img height="48" src="/img/title.png"></a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navMenu">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navMenu">
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item dropdown">
+        <a style="font-variant:small-caps" class="nav-link dropdown-toggle" href="#" role="button" id="pageSel" data-toggle="dropdown">
+          Dictionary
+        </a>
+        <div class="dropdown-menu dropdown-menu-right">
+          <a style="font-variant:small-caps" class="dropdown-item" href="#"><i class="fas fa-book"></i>&nbsp;Dictionary</a>
+          <a style="font-variant:small-caps" class="dropdown-item" href="/work"><i class="fas fa-pen-nib"></i>&nbsp;Workbook</a>
+        </div>        
+      </li>
+    </ul>
+  </div>  
 </nav>
 <div id="accordion" class="container" style="width:100%;padding:10px">
   <div id="dict" class="card">
     <div class="card-header bg-primary">
-      <button class="btn btn-link text-white" data-toggle="collapse" data-target="#query">
-        <h4 style="margin:0;font-weight:bold"><i class="fas fa-book"></i>&nbsp;DICTIONARY</h4>
+      <button style="padding-left:0" class="btn btn-link text-white" data-toggle="collapse" data-target="#query">
+        <h5 style="margin:0;font-weight:bold"><i class="fas fa-book"></i>&nbsp;DICTIONARY</h5>
       </button>
     </div>
     <div id="query" class="collapse show" data-parent="#accordion">
@@ -146,9 +162,9 @@ function saveResults(e, res) {
 <div class="card">
   <div class="card-header bg-danger" style="padding:0.6rem">
     <button class="btn btn-link text-white" data-toggle="collapse" data-target="#${id}">
-      <h4 class="mb-0" style="font-size:1.4rem">
+      <h5 class="mb-0" style="font-size:1.4rem">
         <b>${e}</b>: no such entry
-      </h4>
+      </h5>
     </button>
   </div>
   <div id="${id}" class="collapse" data-parent="#accordion"></div>
@@ -186,9 +202,7 @@ function saveResults(e, res) {
 <div class="card">
   <div class="card-header bg-info" style="padding:0.6rem">
     <button class="btn btn-link text-white" data-toggle="collapse" data-target="#${id}">
-      <h5 class="mb-0" style="font-size:1.4rem">
-        <b>${e}</b>&nbsp;${phonetics.join(" ")}
-      </h5>
+      <h5 class="mb-0" style="font-size:1.4rem"><b>${e}</b>&nbsp;${phonetics.join(" ")}</h5>
     </button>
   </div>
   <div id="${id}" class="collapse" data-parent="#accordion">

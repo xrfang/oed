@@ -1,0 +1,52 @@
+{{define "body"}}
+{{template "header"}}
+<style>
+th {padding-top:0 !important;font-variant:small-caps;font-weight:normal}
+td {padding-top:0 !important}
+</style>    
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <a class="navbar-brand" href="#"><img height="48" src="/img/title.png"></a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navMenu">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navMenu">
+    <ul class="navbar-nav ml-auto">
+      <li class="nav-item dropdown">
+        <a style="font-variant:small-caps" class="nav-link dropdown-toggle" href="#" role="button" id="pageSel" data-toggle="dropdown">
+          Workbook
+        </a>
+        <div class="dropdown-menu dropdown-menu-right">
+          <a style="font-variant:small-caps" class="dropdown-item" href="/"><i class="fas fa-book"></i>&nbsp;Dictionary</a>
+          <a style="font-variant:small-caps" class="dropdown-item" href="#"><i class="fas fa-pen-nib"></i>&nbsp;Workbook</a>
+        </div>        
+      </li>
+    </ul>
+  </div>  
+</nav>
+<div class="container" style="width:100%;padding:10px">
+  <nav class="navbar navbar-expand-md navbar-light" style="background-color:lightgray">
+    <a class="navbar-brand" style="font-weight:bold;font-size:1.4rem" href="#"><i class="fas fa-pen-nib"></i>&nbsp;WORKBOOK</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#wbActions">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="wbActions">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item" style="margin-right:8px"><button class="btn btn-danger"><i class="fas fa-trash-alt"></i></button></li>
+        <li class="nav-item" style="margin-right:8px"><button class="btn btn-secondary" data-toggle="collapse" data-target="#txtscan"><i class="fas fa-file-alt"></i></button></li>
+        <li class="nav-item"><button class="btn btn-primary"><i class="fas fa-print"></i></button></li>
+      </ul>
+    </div>               
+  </nav>
+  <div id="txtscan" class="card-body collapse" style="border:1px solid lightgray">  
+    <div class="form-group">
+      <label for="paragraph"><i class="fas fa-info-circle"></i>&nbsp;enter text to analyze, then click the "Analyze" button.</label>
+      <textarea class="form-control" id="paragraph" rows="5" style="border-color:lightgray;resize:none"></textarea>
+    </div>
+    <div class="clearfix">
+      <button type="button" class="btn btn-primary float-right" style="font-weight:bold">Analyze</button>                        
+    </div>
+  </div>
+</div>
+{{template "progress"}}
+{{template "footer"}}
+{{end}}

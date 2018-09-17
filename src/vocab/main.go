@@ -35,6 +35,7 @@ func main() {
 	assert(os.MkdirAll(cache, 0755))
 	oc = oed.NewClient(*id, *key, cache, 30)
 	http.HandleFunc("/", home)
+	http.HandleFunc("/work", work)
 	http.HandleFunc("/favicon.ico", favicon)
 	http.HandleFunc("/query/", query)
 	svr := http.Server{
