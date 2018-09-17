@@ -31,7 +31,7 @@ td {padding-top:0 !important}
     </button>
     <div class="collapse navbar-collapse" id="wbActions">
       <ul class="navbar-nav ml-auto">
-        <li class="nav-item" style="margin-right:8px"><button class="btn btn-danger"><i class="fas fa-trash-alt"></i></button></li>
+        <li class="nav-item" style="margin-right:8px"><button id="clrwb" class="btn btn-danger"><i class="fas fa-trash-alt"></i></button></li>
         <li class="nav-item" style="margin-right:8px"><button class="btn btn-secondary" data-toggle="collapse" data-target="#txtscan"><i class="fas fa-file-alt"></i></button></li>
         <li class="nav-item"><button class="btn btn-primary"><i class="fas fa-print"></i></button></li>
       </ul>
@@ -47,6 +47,16 @@ td {padding-top:0 !important}
     </div>
   </div>
 </div>
-{{template "progress"}}
+<script>
+function clearWorkbook() {
+  confirm("Confirmation", "This will remove ALL data from the workbook, proceed?", function() {
+    console.log("TODO: clear workbook...")
+  })
+}
+$(document).ready(function() {
+  $('#clrwb').click(clearWorkbook)
+})
+</script>
+{{template "confirm"}}
 {{template "footer"}}
 {{end}}
