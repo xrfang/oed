@@ -1,0 +1,36 @@
+{{define "confirm"}}
+<div class="modal fade" id="cfmDialog" tabindex="-1" role="dialog">
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title" id="cfmTitle"></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body" id="cfmMesg"></div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">确认</button>
+    </div>
+    </div>
+</div>
+</div>
+<script>
+actionConfirmed = false
+function confirm(title, message, action) {
+    $('#cfmTitle').text(title)
+    $('#cfmMesg').text(message)
+    $('#cfmDialog').on('hide.bs.modal', function() {
+        var elm = $(document.activeElement);
+        if (elm.hasClass('btn-primary')) {
+            actionConfirmed = true
+        }
+    })
+    $('#cfm').on('hidden.bs.modal', function() {
+        if (actionConfirmed) action()
+    })
+    $('#cfm').modal()
+}
+</script>
+{{end}}
