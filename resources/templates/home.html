@@ -70,8 +70,11 @@ function showResults() {
       $('#dict').after(lr)
     }
   })
-  $('.close').on('click', function (e) {
+  $('.close').on('click', function () {
     $(this).closest('.card').remove()
+  })
+  $('.pick').on('click', function() {
+    console.log('TODO: picking definition...')
   })
 }
 function genThesaurusEntry(t) {
