@@ -85,9 +85,12 @@ function genThesaurusEntry(t) {
   var ts = []
   var tags = ""
   badges = function(cat, list) {
-    return `<tr><th width="1%">${cat}</th><td>${tags}<span style="margin-bottom:5px" 
-      class="badge badge-dark">${list.join(`</span> <span style="margin-bottom:5px"
-      class="badge badge-dark">`)}</span></td></tr>`
+    var bs = []
+    $.each(list, function(_, w) {
+      bs.push(`<a target="dictionary.com" href="https://www.dictionary.com/browse/${w}"
+        style="margin-bottom:5px" class="badge badge-dark">${w}</a>`)
+    })
+    return `<tr><th width="1%">${cat}</th><td>${tags}${bs.join(' ')}</a></td></tr>`
   }
   if (typeof(t.Registers) != "undefined") {
     var rs = []
@@ -176,7 +179,7 @@ function saveResults(e, res) {
     <button class="btn btn-link text-white" data-toggle="collapse" data-target="#${id}">
       <h5 class="mb-0" style="font-size:1.4rem"><b>${e}</b>: no such entry</h5>
     </button>
-    <button style="padding:9 10 0 0" type="button" class="close">&times;</button>      
+    <button style="padding:13 11 0 0" type="button" class="close">&times;</button>      
   </div>
   <div id="${id}" class="collapse" data-parent="#accordion"></div>
 </div>`
@@ -205,15 +208,17 @@ function saveResults(e, res) {
     })
     var phonetics = []
     $.each(ps, function(p){
-      phonetics.push(`<span class="badge badge-pill badge-secondary">${p}</span>`)
+      phonetics.push(`<span class="badge badge-pill badge-secondary" style="font-size:0.9rem;line-height:1.2rem">${p}</span>`)
     })
     lookupResults[e] = `
 <div class="card">
-  <div class="card-header bg-info" style="padding:0.6rem">
-    <button class="btn btn-link text-white" data-toggle="collapse" data-target="#${id}">
-      <h5 class="mb-0" style="font-size:1.4rem"><b>${e}</b>&nbsp;${phonetics.join(" ")}</h5>
-    </button>
-    <button style="padding:9 10 0 0" type="button" class="close">&times;</button>
+  <div class="card-header bg-info" style="padding:0.4rem 0.6rem">
+    <button class="btn btn-link text-white" data-toggle="collapse" data-target="#${id}"
+      style="font-weight:bold;font-size:1.4rem;padding-right:0.25rem">${e}</button>
+    ${phonetics.join(" ")}<a style="margin-left:0.6rem" class="badge badge-light" 
+      target="dictionary.com" href="https://www.dictionary.com/browse/${e}">
+      <i class="fas fa-external-link-alt"></i></a>
+    <button style="padding:13 11 0 0" type="button" class="close">&times;</button>
   </div>
   <div id="${id}" class="collapse" data-parent="#accordion">
     <div id="${id}_result" style="padding:0" class="card-body">${les.join("")}</div>
