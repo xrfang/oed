@@ -47,6 +47,7 @@ type Sense struct {
 }
 
 type LexicalEntry struct {
+	ID             string
 	Category       string
 	Senses         []Sense
 	Pronunciations []oed.Pronunciation
@@ -124,6 +125,7 @@ func query(w http.ResponseWriter, r *http.Request) {
 	assert(err)
 	for _, entry := range entries {
 		var le LexicalEntry
+		le.ID = entry.ID
 		le.Category = entry.LexicalCategory
 		for _, e := range entry.Entries {
 			for _, s := range e.Senses {
