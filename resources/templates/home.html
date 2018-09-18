@@ -165,11 +165,9 @@ function saveResults(e, res) {
 <div class="card">
   <div class="card-header bg-danger" style="padding:0.6rem">
     <button class="btn btn-link text-white" data-toggle="collapse" data-target="#${id}">
-      <h5 class="mb-0" style="font-size:1.4rem">
-        <b>${e}</b>: no such entry
-      </h5>
+      <h5 class="mb-0" style="font-size:1.4rem"><b>${e}</b>: no such entry</h5>
     </button>
-    <button style="padding:11 10 0 0" type="button" class="close">&times;</button>      
+    <button style="padding:9 10 0 0" type="button" class="close">&times;</button>      
   </div>
   <div id="${id}" class="collapse" data-parent="#accordion"></div>
 </div>`
@@ -188,11 +186,8 @@ function saveResults(e, res) {
 <div class="card">
   <div class="card-header" id="${r.ID}_h${i}">
     <button class="btn btn-link" data-toggle="collapse" data-target="#${r.ID}_c${i}">
-      <h5 class="mb-0">
-        ${r.Category}
-      </h5>
+      <h5 class="mb-0">${r.Category}</h5>
     </button>
-    <button style="padding:11 10 0 0" type="button" class="close">&times;</button>      
   </div>
   <div id="${r.ID}_c${i}" class="collapse" data-parent="#${id}_result">
     <div class="card-body">${senses.join("")}</div>
@@ -209,6 +204,7 @@ function saveResults(e, res) {
     <button class="btn btn-link text-white" data-toggle="collapse" data-target="#${id}">
       <h5 class="mb-0" style="font-size:1.4rem"><b>${e}</b>&nbsp;${phonetics.join(" ")}</h5>
     </button>
+    <button style="padding:9 10 0 0" type="button" class="close">&times;</button>
   </div>
   <div id="${id}" class="collapse" data-parent="#accordion">
     <div id="${id}_result" style="padding:0" class="card-body">${les.join("")}</div>
@@ -239,7 +235,7 @@ $(document).ready(function() {
       showToast("info", "Error", "Nothing to do...")
       return
     }
-    $('#words').val(entries.join(", "))
+    $('#words').val(entries.sort().join(", "))
     lookupResults = {}
     var c = 0
     $.each(entries, function(_, e) {
