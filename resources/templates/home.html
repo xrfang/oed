@@ -127,11 +127,12 @@ function genSenseTable(sense) {
       def = ds.join(" ") + " " + def
     }
   }
+  pick = `&nbsp; <a class="pick" href="#"><i class="fas fa-thumbs-up"></i></a>`
   if (def == "" || isEmpty) {
-    rows.push(`<tr><th width="1%">Definition</th><td>${def}</td></tr>`)
+    rows.push(`<tr><th width="1%">Definition</th><td>${def}${pick}</td></tr>`)
     rows.push(`<tbody id="${id}">`)
   } else {
-    rows.push(`<tr><th width="1%"><a data-toggle="collapse" href="#${id}">Definition</a></th><td>${def}</td></tr>`)
+    rows.push(`<tr><th width="1%"><a data-toggle="collapse" href="#${id}">Definition</a></th><td>${def}${pick}</td></tr>`)
     rows.push(`<tbody class="collapse" id="${id}">`)
   }
   if (typeof(sense.Examples) != 'undefined') {
