@@ -17,9 +17,8 @@
 </div>
 </div>
 <script>
-actionConfirmed = false
 function confirm(title, message, action) {
-    actionConfirmed = false
+    var actionConfirmed = false
     $('#cfmTitle').text(title)
     $('#cfmMesg').text(message)
     $('#cfmDialog').on('hide.bs.modal', function() {
@@ -27,9 +26,11 @@ function confirm(title, message, action) {
         if (elm.hasClass('btn-primary')) {
             actionConfirmed = true
         }
+        $('#cfmDialog').off('hide.bs.modal')
     })
     $('#cfmDialog').on('hidden.bs.modal', function() {
         if (actionConfirmed) action()
+        $('#cfmDialog').off('hidden.bs.modal')
     })
     $('#cfmDialog').modal()
 }
