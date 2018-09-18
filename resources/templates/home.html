@@ -74,7 +74,11 @@ function showResults() {
     $(this).closest('.card').remove()
   })
   $('.pick').on('click', function() {
-    console.log('TODO: picking definition...')
+    var t = $(this).closest("table")
+    var entryID = t.attr("entryID")
+    var senseIdx = t.attr("senseIdx")
+    var subSenseIdx = t.attr("subSenseIdx")
+    console.log(`entry=${entryID}, sense=${senseIdx}, sub-sense=${subSenseIdx}`)
   })
 }
 function genThesaurusEntry(t) {
@@ -113,7 +117,7 @@ function genThesaurusEntry(t) {
   }
   return `<table class="table table-condensed mb-0">${ts.join("")}</table>`
 }
-function genSenseTable(sense) {
+function genSenseTable(entryID, senseIdx, subSenseIdx, sense) {
   id = "SENSE_"+makeid()
   var rows = []
   var def = sense.Definition
@@ -153,13 +157,14 @@ function genSenseTable(sense) {
   }
   if (typeof(sense.SubSenses) != 'undefined') {
     var subs = []
-    $.each(sense.SubSenses, function(_, ss) {
-      subs.push(genSenseTable(ss))
+    $.each(sense.SubSenses, function(idx, ss) {
+      subs.push(genSenseTable(entryID, senseIdx, idx, ss))
     })
     rows.push(`<tr><th width="1%">Subsenses</th><td style="padding:0">${subs.join("")}</td></tr>`)
   }
   rows.push(`</tbody>`)
-  var st = `<table class="table table-condensed table-borderless">${rows.join("")}</table>`
+  var st = `<table entryID="${entryID}" senseIdx="${senseIdx}" subSenseIdx="${subSenseIdx}"
+    class="table table-condensed table-borderless">${rows.join("")}</table>`
   return st
 }
 function saveResults(e, res) {
@@ -183,8 +188,8 @@ function saveResults(e, res) {
       $.each(r.Pronunciations, function(_, p) {
         ps[p.PhoneticSpelling] = true
       })
-      $.each(r.Senses, function(_, s) {
-        senses.push(genSenseTable(s))
+      $.each(r.Senses, function(idx, s) {
+        senses.push(genSenseTable(r.ID, idx, -1, s))
       })
       les.push(`
 <div class="card">
