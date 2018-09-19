@@ -87,7 +87,7 @@ function genThesaurusEntry(t) {
   badges = function(cat, list) {
     var bs = []
     $.each(list, function(_, w) {
-      bs.push(`<a target="dictionary.com" href="https://www.dictionary.com/browse/${w}"
+      bs.push(`<a target="_blank" href="https://www.dictionary.com/browse/${w}"
         style="margin-bottom:5px" class="badge badge-dark">${w}</a>`)
     })
     return `<tr><th width="1%">${cat}</th><td>${tags}${bs.join(' ')}</a></td></tr>`
@@ -137,7 +137,7 @@ function genSenseTable(entryID, senseIdx, subSenseIdx, sense) {
       def = ds.join(" ") + " " + def
     }
   }
-  pick = `&nbsp; <a class="pick" href="#"><i class="fas fa-thumbs-up"></i></a>`
+  pick = `&nbsp;&nbsp;<a class="pick" href="#"><i class="fas fa-check"></i></a>`
   if (def == "" || isEmpty) {
     rows.push(`<tr><th width="1%">Definition</th><td>${def}${pick}</td></tr>`)
     rows.push(`<tbody id="${id}">`)
@@ -216,7 +216,7 @@ function saveResults(e, res) {
     <button class="btn btn-link text-white" data-toggle="collapse" data-target="#${id}"
       style="font-weight:bold;font-size:1.4rem;padding-right:0.25rem">${e}</button>
     ${phonetics.join(" ")}<a style="margin-left:0.6rem" class="badge badge-light" 
-      target="dictionary.com" href="https://www.dictionary.com/browse/${e}">
+      target="_blank" href="https://www.dictionary.com/browse/${e}">
       <i class="fas fa-external-link-alt"></i></a>
     <button style="padding:13 11 0 0" type="button" class="close">&times;</button>
   </div>
