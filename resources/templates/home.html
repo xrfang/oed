@@ -17,7 +17,7 @@ td {padding-top:0 !important}
         </a>
         <div class="dropdown-menu dropdown-menu-right">
           <a style="font-variant:small-caps" class="dropdown-item" href="#"><i class="fas fa-book"></i>&nbsp;Dictionary</a>
-          <a style="font-variant:small-caps" class="dropdown-item" href="/work"><i class="fas fa-pen-nib"></i>&nbsp;Workbook</a>
+          <a style="font-variant:small-caps" class="dropdown-item" href="/wb/show"><i class="fas fa-pen-nib"></i>&nbsp;Workbook</a>
         </div>        
       </li>
     </ul>
@@ -75,10 +75,13 @@ function showResults() {
   })
   $('.pick').on('click', function() {
     var t = $(this).closest("table")
-    var entryID = t.attr("entryID")
-    var senseIdx = t.attr("senseIdx")
-    var subSenseIdx = t.attr("subSenseIdx")
-    console.log(`entry=${entryID}, sense=${senseIdx}, sub-sense=${subSenseIdx}`)
+    var category = t.attr("category")
+    var entry = t.attr("entry")
+    var sense = t.attr("sense")
+    var subSense = t.attr("subsense")
+    $.get(`/wb/add/${entry}/${category}/${sense}/${subSense}`, function(ret) {
+      console.log(ret)
+    })
   })
 }
 function genThesaurusEntry(t) {
@@ -120,7 +123,7 @@ function genThesaurusEntry(t) {
   }
   return `<table class="table table-condensed mb-0">${ts.join("")}</table>`
 }
-function genSenseTable(entryID, senseIdx, subSenseIdx, sense) {
+function genSenseTable(lexicalCategory, entryID, senseIdx, subSenseIdx, sense) {
   id = "SENSE_"+makeid()
   var rows = []
   var def = sense.Definition
@@ -161,12 +164,12 @@ function genSenseTable(entryID, senseIdx, subSenseIdx, sense) {
   if (typeof(sense.SubSenses) != 'undefined') {
     var subs = []
     $.each(sense.SubSenses, function(idx, ss) {
-      subs.push(genSenseTable(entryID, senseIdx, idx, ss))
+      subs.push(genSenseTable(lexicalCategory, entryID, senseIdx, idx, ss))
     })
     rows.push(`<tr><th width="1%">Subsenses</th><td style="padding:0">${subs.join("")}</td></tr>`)
   }
   rows.push(`</tbody>`)
-  var st = `<table entryID="${entryID}" senseIdx="${senseIdx}" subSenseIdx="${subSenseIdx}"
+  var st = `<table category="${lexicalCategory}" entry="${entryID}" sense="${senseIdx}" subsense="${subSenseIdx}"
     class="table table-condensed table-borderless">${rows.join("")}</table>`
   return st
 }
@@ -192,7 +195,7 @@ function saveResults(e, res) {
         ps[p.PhoneticSpelling] = true
       })
       $.each(r.Senses, function(idx, s) {
-        senses.push(genSenseTable(r.ID, idx, -1, s))
+        senses.push(genSenseTable(r.Category, r.ID, idx, -1, s))
       })
       les.push(`
 <div class="card">

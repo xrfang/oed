@@ -9,8 +9,11 @@ import (
 	"time"
 )
 
-var oc *oed.Client
-var cache string
+var (
+	oc    *oed.Client
+	cache string
+	port  string
+)
 
 func main() {
 	defer func() {
@@ -21,7 +24,7 @@ func main() {
 	ver := flag.Bool("version", false, "show version info")
 	id := flag.String("id", "", "OED app_id")
 	key := flag.String("key", "", "OED app_key")
-	port := flag.String("port", "3528", "service port")
+	flag.StringVar(&port, "port", "3528", "service port")
 	flag.StringVar(&cache, "cache", "cache", "cache directory")
 	flag.Parse()
 	if *ver {
@@ -35,11 +38,12 @@ func main() {
 	assert(os.MkdirAll(cache, 0755))
 	oc = oed.NewClient(*id, *key, cache, 30)
 	http.HandleFunc("/", home)
-	http.HandleFunc("/work", work)
+	http.HandleFunc("/wb/show", work)
+	http.HandleFunc("/wb/add/", wbadd)
 	http.HandleFunc("/favicon.ico", favicon)
 	http.HandleFunc("/query/", query)
 	svr := http.Server{
-		Addr:         ":" + *port,
+		Addr:         ":" + port,
 		ReadTimeout:  time.Minute,
 		WriteTimeout: time.Minute,
 	}
