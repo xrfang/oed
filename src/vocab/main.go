@@ -42,6 +42,7 @@ func main() {
 	http.HandleFunc("/wb/add/", wbadd)
 	http.HandleFunc("/favicon.ico", favicon)
 	http.HandleFunc("/query/", query)
+	http.HandleFunc("/related/", related)
 	svr := http.Server{
 		Addr:         ":" + port,
 		ReadTimeout:  time.Minute,

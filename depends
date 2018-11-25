@@ -15,3 +15,6 @@
 # Following are sample dependencies, modify as appropriate.
 
 http://github.com/tmthrgd/go-bindata
+http://github.com/PuerkitoBio/goquery
+github.com/andybalholm/cascadia
+golang.org/x/net/html

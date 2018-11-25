@@ -209,6 +209,24 @@ function saveResults(e, res) {
   </div>
 </div>`)
     })
+    if (typeof(res["related"]) == "object") {
+      var rw = []
+      $.each(res["related"], function(i, r) {
+        rw.push(`<a target="_blank" href="https:\/\/www.dictionary.com/browse/${r}"
+          style="margin:5px" class="badge badge-warning">${r}</a>`)
+      })
+      les.push(`
+<div class="card">
+  <div class="card-header" id="${e}_h_related">
+    <button class="btn btn-link" data-toggle="collapse" data-target="#${e}_c_related">
+      <h5 class="mb-0">Related Words</h5>
+    </button>
+  </div>
+  <div id="${e}_c_related" class="collapse" data-parent="#${id}_result">
+    <div class="card-body">${rw.join("")}</div>
+  </div>
+</div>`)      
+    }
     var phonetics = []
     $.each(ps, function(p){
       phonetics.push(`<span class="badge badge-pill badge-secondary" style="font-size:0.9rem;line-height:1.2rem">${p}</span>`)
@@ -257,6 +275,13 @@ $(document).ready(function() {
     var c = 0
     $.each(entries, function(_, e) {
       var xhr = $.get("/query/"+e, function(ret) {
+        $.ajax({
+          url: "/related/"+e,
+          async: false,
+          success: function(rels) {
+            ret["related"] = rels
+          }
+        })
         saveResults(e, ret)
         c++
         percent = Math.round(c/L*100)

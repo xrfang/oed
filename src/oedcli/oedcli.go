@@ -3,6 +3,7 @@ package oed
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -12,6 +13,8 @@ import (
 	"sync"
 	"time"
 	"unicode"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 type Client struct {
@@ -120,4 +123,47 @@ func (c Client) QueryThesaurus(word string) (qr QueryReply, err error) {
 	cache := path.Join(c.cache, c.entry(word)+".thesaurus.json")
 	url := c.url + word + "/synonyms;antonyms"
 	return c.doQuery(url, cache)
+}
+
+func (c Client) QueryRelated(word string) (rels []string, err error) {
+	word = c.entry(word)
+	cache := path.Join(c.cache, word+".related.json")
+	f, e := os.Open(cache)
+	if e == nil {
+		jd := json.NewDecoder(f)
+		e := jd.Decode(&rels)
+		f.Close()
+		if e == nil {
+			return
+		}
+	}
+	os.Remove(cache)
+	defer func() {
+		if e := recover(); e != nil {
+			err = e.(error)
+		}
+	}()
+	url := "https://www.dictionary.com/browse/" + word
+	hc := http.Client{Timeout: time.Minute}
+	res, err := hc.Get(url)
+	assert(err)
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		panic(fmt.Errorf(res.Status))
+	}
+	doc, err := goquery.NewDocumentFromReader(res.Body)
+	assert(err)
+	s := doc.Find("h2:contains('Related Words for')")
+	if s != nil {
+		s = s.Parent()
+		s.Find("a").Each(func(i int, a *goquery.Selection) {
+			rels = append(rels, a.Text())
+		})
+	}
+	if len(rels) > 0 {
+		f, _ := os.Create(cache)
+		json.NewEncoder(f).Encode(rels)
+		f.Close()
+	}
+	return
 }

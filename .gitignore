@@ -2,4 +2,5 @@ assets.go
 bin/
 cache/
 github.com
+golang.org
 pkg/
